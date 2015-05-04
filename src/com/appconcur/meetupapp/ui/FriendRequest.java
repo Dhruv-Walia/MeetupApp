@@ -1,18 +1,21 @@
 package com.appconcur.meetupapp.ui;
 
-
 import com.appconcur.meetupapp.R;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-public class FriendRequest extends Activity{
+public class FriendRequest extends Fragment{
 	
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.friend_request);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View v = inflater.inflate(R.layout.friend_request, container, false);
+		return v;
 	}
+	
 
 }

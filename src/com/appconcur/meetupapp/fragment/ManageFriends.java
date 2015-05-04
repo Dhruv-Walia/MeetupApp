@@ -4,10 +4,12 @@ import com.appconcur.meetupapp.R;
 import com.appconcur.meetupapp.ui.FindFriend;
 import com.appconcur.meetupapp.ui.FriendRequest;
 import com.appconcur.meetupapp.ui.MyFriends;
+import com.appconcur.meetupapp.utils.TabManager;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,42 +18,57 @@ import android.widget.TabHost;
 
 public class ManageFriends  extends Fragment{
 	
-	Context mcontext;
+	Context mContext;
 	TabHost tabHost;
 	TabHost.TabSpec tab1,tab2,tab3; 
+	TabManager mTabManager;
 	
-	public ManageFriends(Context context){
-		this.mcontext = context;
+	@Override
+	public void onAttach(Activity activity) {
+		// TODO Auto-generated method stub
+		super.onAttach(activity);
+		this.mContext = (Context)activity;
 	}
 
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    @SuppressLint("NewApi") @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mTabManager = new TabManager(getActivity(), getFragmentManager(),
+                android.R.id.tabcontent);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
- 
-        View rootView = inflater.inflate(R.layout.manage_friends, container, false);
-        // create the TabHost that will contain the Tabs
-        tabHost = (TabHost)rootView.findViewById(android.R.id.tabhost);
-        tabHost.setup();
-        tab1 = tabHost.newTabSpec("First Tab");
-        tab2 = tabHost.newTabSpec("Second Tab");
-        tab3 = tabHost.newTabSpec("Third tab");
+        View v = inflater.inflate(R.layout.manage_friends, container, false);
+        TabHost host = mTabManager.handleCreateView(v);
 
-       // Set the Tab name and Activity
-       // that will be opened when particular Tab will be selected
-        tab1.setIndicator("My Friends");
-        tab1.setContent(new Intent(mcontext,MyFriends.class));
-       
-        tab2.setIndicator("Friend Requests");
-        tab2.setContent(new Intent(mcontext,FriendRequest.class));
+        mTabManager.addTab(host.newTabSpec("friends").setIndicator("My Friends"),
+                MyFriends.class, null);
+        mTabManager.addTab(host.newTabSpec("request").setIndicator("Friend Requests"),
+                FriendRequest.class, null);
+        mTabManager.addTab(host.newTabSpec("find").setIndicator("Find Friends"),
+                FindFriend.class, null);
 
-        tab3.setIndicator("Find Friends");
-        tab3.setContent(new Intent(mcontext,FindFriend.class));
-       
-        /** Add the tabs  to the TabHost to display. */
-        tabHost.addTab(tab1);
-        tabHost.addTab(tab2);
-        tabHost.addTab(tab3);
-        
-        return rootView;
+        return v;
+    }
+
+    @SuppressLint("NewApi") @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        mTabManager.handleViewStateRestored(savedInstanceState);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mTabManager.handleDestroyView();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mTabManager.handleSaveInstanceState(outState);
     }
 
 }

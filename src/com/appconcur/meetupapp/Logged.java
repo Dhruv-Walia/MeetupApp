@@ -78,7 +78,6 @@ public class Logged extends FragmentActivity{
 			
 			@Override
 			public void onClick(View v) {
-
 		 
 			}
 		});
@@ -87,7 +86,6 @@ public class Logged extends FragmentActivity{
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -224,7 +222,7 @@ public class Logged extends FragmentActivity{
 			fragment = new CreateParty(this);
 			break;
 		case 3:
-			fragment = new ManageFriends(this);
+			fragment = new ManageFriends();
 			break;
 		case 4:
 			fragment = new Rewards(this);

@@ -28,7 +28,7 @@ public class RejectFriendRequest extends AsyncTask<string, Void, Boolean>
 
 	protected void onPreExecute() {
 
-    	this.dialog.setTitle("Getting Friend Request");
+    	this.dialog.setTitle("Rejecting Friend Request");
         this.dialog.setMessage("Rejecting...");
         this.dialog.show();
     }
