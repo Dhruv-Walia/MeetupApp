@@ -1,6 +1,7 @@
 package com.appconcur.meetupapp;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.appconcur.meetupapp.adapter.NavDrawerListAdapter;
 import com.appconcur.meetupapp.fragment.CreateGroup;
@@ -11,17 +12,15 @@ import com.appconcur.meetupapp.fragment.MainFragment;
 import com.appconcur.meetupapp.fragment.ManageFriends;
 import com.appconcur.meetupapp.fragment.Rewards;
 import com.appconcur.meetupapp.utils.NavDrawerItem;
+import com.appconcur.meetupapp.utils.SessionManager;
 import com.appconcur.meetupapp.webservices.SignOutShepHz;
-import com.facebook.CallbackManager;
+
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
@@ -30,20 +29,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
-public class Logged extends FragmentActivity{
+public class Logged extends FragmentActivity {
 	
 	private DrawerLayout mDrawerLayout;
 	private ListView mDrawerList;
 	private ActionBarDrawerToggle mDrawerToggle;
-	private CallbackManager callbackManager;
 	
 	private String Username,SessionId;
 	private boolean sess;
+	
+	// tag for activity
+	//private String Tag = this.getClass().getName(); 
+	
+	// Session Manager Class
+    private SessionManager session;
 	
 	// nav drawer title
 	private CharSequence mDrawerTitle;
@@ -62,34 +65,22 @@ public class Logged extends FragmentActivity{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.logged);
-		Username = getIntent().getStringExtra("user");
-		SessionId = getIntent().getStringExtra("session");
+		// Session class instance
+        session = new SessionManager(getApplicationContext());
+        Toast.makeText(getApplicationContext(), "User Login Status: " + session.isLoggedIn(), Toast.LENGTH_LONG).show();
+        /**
+         * Call this function whenever you want to check user login
+         * This will redirect user to LoginActivity is he is not
+         * logged in
+         * */
+        session.checkLogin();
+        // get user data from session
+        HashMap<String, String> user = session.getUserDetails();
+        
+		Username = user.get(SessionManager.KEY_NAME);
+		SessionId = user.get(SessionManager.KEY_SESSIONID);
 		sess = true;
-		
-		final Dialog dialog = new Dialog(Logged.this);
-        dialog.setTitle("");
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
-        dialog.setContentView(R.layout.login_dialogbox);
-        ImageButton google = (ImageButton)dialog.findViewById(R.id.g_sign);
-        ImageButton facebook = (ImageButton)dialog.findViewById(R.id.f_sign);
-        dialog.show();
-        
-        facebook.setOnClickListener(new OnClickListener() {
 			
-			@Override
-			public void onClick(View v) {
-		 
-			}
-		});
-        
-        google.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				
-			}
-		});
-
 		mTitle = mDrawerTitle = getTitle();
 		// load slide menu items
 		navMenuTitles = getResources().getStringArray(R.array.nav_drawer_items);
@@ -160,7 +151,7 @@ public class Logged extends FragmentActivity{
 
 	/**
 	 * Slide menu item click listener
-	 * */
+	 **/
 	private class SlideMenuClickListener implements
 			ListView.OnItemClickListener {
 		@Override
@@ -265,17 +256,6 @@ public class Logged extends FragmentActivity{
 		getActionBar().setTitle(mTitle);
 	}
 	
-	
-	/**
-	 * When using the ActionBarDrawerToggle, you must call it during
-	 * onPostCreate() and onConfigurationChanged()...
-	 */
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		callbackManager.onActivityResult(requestCode, resultCode, data);
-	}
 	@Override
 	protected void onPostCreate(Bundle savedInstanceState) {
 		super.onPostCreate(savedInstanceState);
@@ -289,28 +269,21 @@ public class Logged extends FragmentActivity{
 		// Pass any configuration change to the drawer toggls
 		mDrawerToggle.onConfigurationChanged(newConfig);
 	}
-
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-		Intent in=new Intent();
-		getApplicationContext().stopService(in);
-	}
 	
 	@Override
 	public void onBackPressed() {
 		if(sess == true){
 			//Alert dialog for accepting/rejecting friend request 
 			AlertDialog.Builder builder1 = new AlertDialog.Builder(Logged.this);
-            builder1.setMessage("You are Logged in:" +
-            		"Do you really want to exit session ");
+            builder1.setMessage("You are Logged in:" + "Do you really want to exit session ");
             builder1.setCancelable(true);
             builder1.setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                 	SignOutShepHz so = new SignOutShepHz(Logged.this, SessionId);
         		    so.execute();
+        		    session.logoutUser();
                     dialog.cancel();
+                    
                 }
             });
             builder1.setNegativeButton("No",new DialogInterface.OnClickListener() {
@@ -324,6 +297,12 @@ public class Logged extends FragmentActivity{
 		}else{
 			super.onBackPressed();
 		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
 	}
 
 }
